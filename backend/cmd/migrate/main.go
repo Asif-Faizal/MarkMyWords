@@ -7,9 +7,9 @@ import (
 
 func main() {
 	log.Println("Starting database migration...")
-	
+
 	// Initialize database (this will auto-migrate)
 	database.InitDB()
-	
+
 	log.Println("Database migration completed successfully!")
 }
