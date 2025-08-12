@@ -4,12 +4,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"markmywords-backend/internal/handlers"
 	"markmywords-backend/internal/middleware"
 	"markmywords-backend/internal/websocket"
 	"markmywords-backend/pkg/database"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
