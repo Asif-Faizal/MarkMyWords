@@ -3,10 +3,11 @@ package services
 import (
 	"errors"
 
-	"gorm.io/gorm"
 	"markmywords-backend/internal/models"
 	"markmywords-backend/pkg/auth"
 	"markmywords-backend/pkg/database"
+
+	"gorm.io/gorm"
 )
 
 type UserService struct {
@@ -99,7 +100,7 @@ func (s *UserService) GetUserByID(userID uint) (*models.UserResponse, error) {
 
 func (s *UserService) SearchUsers(query string, currentUserID uint) ([]models.UserResponse, error) {
 	var users []models.User
-	err := s.db.Where("(username LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ?) AND id != ?", 
+	err := s.db.Where("(username LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ?) AND id != ?",
 		"%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%", currentUserID).
 		Limit(10).
 		Find(&users).Error

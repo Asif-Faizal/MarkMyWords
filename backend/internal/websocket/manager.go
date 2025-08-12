@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"markmywords-backend/internal/models"
 )
 
@@ -165,7 +164,7 @@ func (m *Manager) handleNoteUpdate(message models.WebSocketMessage) {
 
 	// Broadcast to all users in the note room except the sender
 	m.broadcastToNoteExcept(updateMsg.NoteID, message.UserID, models.WebSocketMessage{
-		Type: "note:update",
+		Type:    "note:update",
 		Payload: updateMsg,
 	})
 }
@@ -184,7 +183,7 @@ func (m *Manager) handleUserTyping(message models.WebSocketMessage) {
 
 	// Broadcast to all users in the note room except the sender
 	m.broadcastToNoteExcept(typingMsg.NoteID, message.UserID, models.WebSocketMessage{
-		Type: "note:user_typing",
+		Type:    "note:user_typing",
 		Payload: typingMsg,
 	})
 }

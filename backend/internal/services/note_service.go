@@ -3,9 +3,10 @@ package services
 import (
 	"errors"
 
-	"gorm.io/gorm"
 	"markmywords-backend/internal/models"
 	"markmywords-backend/pkg/database"
+
+	"gorm.io/gorm"
 )
 
 type NoteService struct {

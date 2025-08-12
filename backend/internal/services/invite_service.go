@@ -3,9 +3,10 @@ package services
 import (
 	"errors"
 
-	"gorm.io/gorm"
 	"markmywords-backend/internal/models"
 	"markmywords-backend/pkg/database"
+
+	"gorm.io/gorm"
 )
 
 type InviteService struct {
@@ -37,7 +38,7 @@ func (s *InviteService) CreateInvite(req *models.CreateInviteRequest, fromUserID
 
 	// Check if invite already exists
 	var existingInvite models.Invite
-	if err := s.db.Where("note_id = ? AND to_user_id = ? AND status = ?", 
+	if err := s.db.Where("note_id = ? AND to_user_id = ? AND status = ?",
 		req.NoteID, req.ToUserID, models.InviteStatusPending).First(&existingInvite).Error; err == nil {
 		return nil, errors.New("invite already exists")
 	}
@@ -167,7 +168,7 @@ func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, er
 
 func (s *InviteService) AcceptInvite(inviteID, userID uint) error {
 	var invite models.Invite
-	if err := s.db.Where("id = ? AND to_user_id = ? AND status = ?", 
+	if err := s.db.Where("id = ? AND to_user_id = ? AND status = ?",
 		inviteID, userID, models.InviteStatusPending).First(&invite).Error; err != nil {
 		return errors.New("invite not found or already processed")
 	}
@@ -197,7 +198,7 @@ func (s *InviteService) AcceptInvite(inviteID, userID uint) error {
 
 func (s *InviteService) DeclineInvite(inviteID, userID uint) error {
 	var invite models.Invite
-	if err := s.db.Where("id = ? AND to_user_id = ? AND status = ?", 
+	if err := s.db.Where("id = ? AND to_user_id = ? AND status = ?",
 		inviteID, userID, models.InviteStatusPending).First(&invite).Error; err != nil {
 		return errors.New("invite not found or already processed")
 	}

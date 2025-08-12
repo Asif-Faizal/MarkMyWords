@@ -3,9 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"markmywords-backend/internal/models"
 	"markmywords-backend/internal/services"
+
+	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler struct {
