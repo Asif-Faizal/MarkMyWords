@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'services/api_service.dart';
-import 'services/websocket_service.dart';
-import 'providers/auth_provider.dart';
-import 'providers/note_provider.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/di/injection_container.dart' as di;
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/notes/presentation/bloc/notes_bloc.dart';
+import 'features/invites/presentation/bloc/invites_bloc.dart';
+import 'features/auth/presentation/pages/login_page.dart';
+import 'features/notes/presentation/pages/home_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   runApp(const MarkMyWordsApp());
 }
 
@@ -16,24 +18,16 @@ class MarkMyWordsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        Provider<ApiService>(
-          create: (_) => ApiService(),
+        BlocProvider<AuthBloc>(
+          create: (context) => di.sl<AuthBloc>()..add(CheckAuthStatus()),
         ),
-        Provider<WebSocketService>(
-          create: (_) => WebSocketService(),
+        BlocProvider<NotesBloc>(
+          create: (context) => di.sl<NotesBloc>(),
         ),
-        ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(
-            apiService: context.read<ApiService>(),
-          ),
-        ),
-        ChangeNotifierProvider<NoteProvider>(
-          create: (context) => NoteProvider(
-            apiService: context.read<ApiService>(),
-            webSocketService: context.read<WebSocketService>(),
-          ),
+        BlocProvider<InvitesBloc>(
+          create: (context) => di.sl<InvitesBloc>(),
         ),
       ],
       child: MaterialApp(
@@ -73,9 +67,9 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        if (authProvider.isLoading) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoading) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -83,11 +77,11 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        if (authProvider.isAuthenticated) {
-          return const HomeScreen();
+        if (state is AuthAuthenticated) {
+          return const HomePage();
         }
 
-        return const LoginScreen();
+        return const LoginPage();
       },
     );
   }
