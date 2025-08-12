@@ -58,6 +58,8 @@ dependencies:
   equatable: ^2.0.5
   # Get it for dependency injection
   get_it: ^7.6.4
+  # Functional programming
+  dartz: ^0.10.1
 
 dev_dependencies:
   flutter_test:
