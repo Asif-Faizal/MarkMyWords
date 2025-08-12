@@ -28,15 +28,15 @@ class Invite {
 
   Invite({
     required this.id,
-    required this.noteId,
-    required this.fromUserId,
-    required this.toUserId,
+    @JsonKey(name: 'note_id') required this.noteId,
+    @JsonKey(name: 'from_user_id') required this.fromUserId,
+    @JsonKey(name: 'to_user_id') required this.toUserId,
     required this.status,
-    required this.createdAt,
-    required this.updatedAt,
+    @JsonKey(name: 'created_at') required this.createdAt,
+    @JsonKey(name: 'updated_at') required this.updatedAt,
     required this.note,
-    required this.fromUser,
-    required this.toUser,
+    @JsonKey(name: 'from_user') required this.fromUser,
+    @JsonKey(name: 'to_user') required this.toUser,
   });
 
   factory Invite.fromJson(Map<String, dynamic> json) => _$InviteFromJson(json);

@@ -15,9 +15,9 @@ class User {
     required this.id,
     required this.email,
     required this.username,
-    required this.firstName,
-    required this.lastName,
-    required this.createdAt,
+    @JsonKey(name: 'first_name') required this.firstName,
+    @JsonKey(name: 'last_name') required this.lastName,
+    @JsonKey(name: 'created_at') required this.createdAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
