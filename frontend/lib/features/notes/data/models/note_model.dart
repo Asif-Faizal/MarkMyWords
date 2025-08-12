@@ -8,25 +8,21 @@ part 'note_model.g.dart';
 @JsonSerializable()
 class NoteModel extends Equatable {
   final int id;
-  final String title;
   final String content;
-  final bool isPrivate;
-  final int userId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  @JsonKey(name: 'thread_id') final int threadId;
+  @JsonKey(name: 'user_id') final int userId;
   final UserModel? user;
-  final List<UserModel> collaborators;
+  @JsonKey(name: 'created_at') final DateTime createdAt;
+  @JsonKey(name: 'updated_at') final DateTime updatedAt;
 
   const NoteModel({
     required this.id,
-    required this.title,
     required this.content,
-    @JsonKey(name: 'is_private') required this.isPrivate,
-    @JsonKey(name: 'user_id') required this.userId,
-    @JsonKey(name: 'created_at') required this.createdAt,
-    @JsonKey(name: 'updated_at') required this.updatedAt,
+    required this.threadId,
+    required this.userId,
     this.user,
-    this.collaborators = const [],
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory NoteModel.fromJson(Map<String, dynamic> json) => _$NoteModelFromJson(json);
@@ -35,41 +31,35 @@ class NoteModel extends Equatable {
   Note toEntity() {
     return Note(
       id: id,
-      title: title,
       content: content,
-      isPrivate: isPrivate,
+      threadId: threadId,
       userId: userId,
+      user: user?.toEntity(),
       createdAt: createdAt,
       updatedAt: updatedAt,
-      user: user?.toEntity(),
-      collaborators: collaborators.map((u) => u.toEntity()).toList(),
     );
   }
 
   factory NoteModel.fromEntity(Note note) {
     return NoteModel(
       id: note.id,
-      title: note.title,
       content: note.content,
-      isPrivate: note.isPrivate,
+      threadId: note.threadId,
       userId: note.userId,
+      user: note.user != null ? UserModel.fromEntity(note.user!) : null,
       createdAt: note.createdAt,
       updatedAt: note.updatedAt,
-      user: note.user != null ? UserModel.fromEntity(note.user!) : null,
-      collaborators: note.collaborators.map((u) => UserModel.fromEntity(u)).toList(),
     );
   }
 
   @override
   List<Object?> get props => [
     id,
-    title,
     content,
-    isPrivate,
+    threadId,
     userId,
+    user,
     createdAt,
     updatedAt,
-    user,
-    collaborators,
   ];
 }
