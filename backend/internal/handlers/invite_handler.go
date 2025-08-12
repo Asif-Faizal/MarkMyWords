@@ -24,12 +24,19 @@ func NewInviteHandler() *InviteHandler {
 }
 
 func (h *InviteHandler) CreateInvite(c *gin.Context) {
+	threadID, err := strconv.ParseUint(c.Param("threadId"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thread ID"})
+		return
+	}
+
 	var req models.CreateInviteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	req.ThreadID = uint(threadID)
 	fromUserID := middleware.GetUserID(c)
 	invite, err := h.inviteService.CreateInvite(&req, fromUserID)
 	if err != nil {

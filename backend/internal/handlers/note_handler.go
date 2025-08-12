@@ -41,9 +41,15 @@ func (h *NoteHandler) CreateNote(c *gin.Context) {
 	})
 }
 
-func (h *NoteHandler) GetNotes(c *gin.Context) {
+func (h *NoteHandler) GetThreadNotes(c *gin.Context) {
+	threadID, err := strconv.ParseUint(c.Param("threadId"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thread ID"})
+		return
+	}
+
 	userID := middleware.GetUserID(c)
-	notes, err := h.noteService.GetUserNotes(userID)
+	notes, err := h.noteService.GetThreadNotes(uint(threadID), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -110,15 +116,4 @@ func (h *NoteHandler) DeleteNote(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Note deleted successfully"})
-}
-
-func (h *NoteHandler) GetCollaborativeNotes(c *gin.Context) {
-	userID := middleware.GetUserID(c)
-	notes, err := h.noteService.GetCollaborativeNotes(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"notes": notes})
 }

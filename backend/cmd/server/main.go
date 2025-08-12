@@ -23,6 +23,7 @@ func main() {
 
 	// Create handlers
 	authHandler := handlers.NewAuthHandler()
+	threadHandler := handlers.NewThreadHandler()
 	noteHandler := handlers.NewNoteHandler()
 	inviteHandler := handlers.NewInviteHandler()
 	wsHandler := handlers.NewWebSocketHandler()
@@ -54,15 +55,25 @@ func main() {
 			// User routes
 			protected.GET("/auth/me", authHandler.GetMe)
 
-			// Note routes
-			notes := protected.Group("/notes")
+			// Thread routes
+			threads := protected.Group("/threads")
 			{
-				notes.GET("", noteHandler.GetNotes)
+				threads.GET("", threadHandler.GetThreads)
+				threads.POST("", threadHandler.CreateThread)
+				threads.GET("/:id", threadHandler.GetThread)
+				threads.PUT("/:id", threadHandler.UpdateThread)
+				threads.DELETE("/:id", threadHandler.DeleteThread)
+				threads.GET("/collaborative", threadHandler.GetCollaborativeThreads)
+			}
+
+			// Note routes (messages within threads)
+			notes := protected.Group("/threads/:threadId/notes")
+			{
+				notes.GET("", noteHandler.GetThreadNotes)
 				notes.POST("", noteHandler.CreateNote)
 				notes.GET("/:id", noteHandler.GetNote)
 				notes.PUT("/:id", noteHandler.UpdateNote)
 				notes.DELETE("/:id", noteHandler.DeleteNote)
-				notes.GET("/collaborative", noteHandler.GetCollaborativeNotes)
 			}
 
 			// Invite routes
@@ -73,8 +84,8 @@ func main() {
 				invites.POST("/:id/decline", inviteHandler.DeclineInvite)
 			}
 
-			// Note collaboration routes
-			notes.POST("/:id/invite", inviteHandler.CreateInvite)
+			// Thread collaboration routes
+			threads.POST("/:threadId/invite", inviteHandler.CreateInvite)
 
 			// User search
 			protected.POST("/users/search", inviteHandler.SearchUsers)
