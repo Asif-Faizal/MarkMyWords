@@ -54,7 +54,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	}
 
 	// Register connection with manager
-	h.manager.Register <- wsConn
+	h.manager.RegisterClient(wsConn)
 
 	// Start goroutines for reading and writing
 	go h.readPump(conn, wsConn)
@@ -63,7 +63,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 
 func (h *WebSocketHandler) readPump(conn *websocket.Conn, wsConn *models.WebSocketConnection) {
 	defer func() {
-		h.manager.Unregister <- wsConn
+		h.manager.UnregisterClient(wsConn)
 		conn.Close()
 	}()
 
@@ -94,7 +94,7 @@ func (h *WebSocketHandler) readPump(conn *websocket.Conn, wsConn *models.WebSock
 		wsMessage.UserID = wsConn.UserID
 
 		// Send to manager
-		h.manager.Broadcast <- wsMessage
+		h.manager.BroadcastMessage(wsMessage)
 	}
 }
 
