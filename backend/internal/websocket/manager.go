@@ -231,3 +231,14 @@ func (m *Manager) UnregisterClient(client *models.WebSocketConnection) {
 func (m *Manager) BroadcastMessage(message *models.WebSocketMessage) {
 	m.broadcast <- message
 }
+
+// Global manager instance
+var globalManager *Manager
+
+func GetManager() *Manager {
+	if globalManager == nil {
+		globalManager = NewManager()
+		go globalManager.Start()
+	}
+	return globalManager
+}

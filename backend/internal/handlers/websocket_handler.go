@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
+	"strconv"
 
 	"markmywords-backend/internal/models"
 	wsmanager "markmywords-backend/internal/websocket"
@@ -13,29 +13,33 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type WebSocketHandler struct {
+	manager *wsmanager.Manager
+}
+
+func NewWebSocketHandler() *WebSocketHandler {
+	return &WebSocketHandler{
+		manager: wsmanager.GetManager(),
+	}
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true // Allow all origins for development
 	},
 }
 
-type WebSocketHandler struct {
-	manager *wsmanager.Manager
-}
-
-func NewWebSocketHandler() *WebSocketHandler {
-	manager := wsmanager.NewManager()
-	go manager.Start() // Start the manager goroutine
-	return &WebSocketHandler{
-		manager: manager,
-	}
-}
-
 func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
-	// Get user ID from query parameter (in production, use proper auth)
+	// Get user ID from query parameter
 	userIDStr := c.Query("user_id")
 	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+		return
+	}
+
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
 		return
 	}
 
@@ -46,96 +50,32 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 		return
 	}
 
-	// Create WebSocket connection
-	wsConn := &models.WebSocketConnection{
-		ID:     generateID(),
-		UserID: 0, // Will be set from token in production
-		Send:   make(chan []byte, 256),
+	// Create WebSocket client
+	client := &models.WebSocketConnection{
+		UserID: uint(userID),
+		Conn:   conn,
 	}
 
-	// Register connection with manager
-	h.manager.RegisterClient(wsConn)
+	// Register client with manager
+	h.manager.RegisterClient(client)
 
-	// Start goroutines for reading and writing
-	go h.readPump(conn, wsConn)
-	go h.writePump(conn, wsConn)
-}
-
-func (h *WebSocketHandler) readPump(conn *websocket.Conn, wsConn *models.WebSocketConnection) {
-	defer func() {
-		h.manager.UnregisterClient(wsConn)
-		conn.Close()
-	}()
-
-	conn.SetReadLimit(512)
-	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-	conn.SetPongHandler(func(string) error {
-		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-		return nil
-	})
-
+	// Handle WebSocket messages
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Error reading message: %v", err)
-			}
+			log.Printf("Error reading message: %v", err)
+			h.manager.UnregisterClient(client)
 			break
 		}
 
 		// Parse message
 		var wsMessage models.WebSocketMessage
 		if err := json.Unmarshal(message, &wsMessage); err != nil {
-			log.Printf("Error unmarshaling message: %v", err)
+			log.Printf("Error parsing message: %v", err)
 			continue
 		}
 
-		// Set user ID from connection
-		wsMessage.UserID = wsConn.UserID
-
-		// Send to manager
-		h.manager.BroadcastMessage(wsMessage)
+		// Broadcast message
+		h.manager.BroadcastMessage(&wsMessage)
 	}
-}
-
-func (h *WebSocketHandler) writePump(conn *websocket.Conn, wsConn *models.WebSocketConnection) {
-	ticker := time.NewTicker(54 * time.Second)
-	defer func() {
-		ticker.Stop()
-		conn.Close()
-	}()
-
-	for {
-		select {
-		case message, ok := <-wsConn.Send:
-			conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-			if !ok {
-				conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-
-			w, err := conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			w.Write(message)
-
-			if err := w.Close(); err != nil {
-				return
-			}
-		case <-ticker.C:
-			conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
-			}
-		}
-	}
-}
-
-func generateID() string {
-	return time.Now().Format("20060102150405") + "-" + time.Now().Format("000000000")
-}
-
-func (h *WebSocketHandler) GetManager() *wsmanager.Manager {
-	return h.manager
 }
