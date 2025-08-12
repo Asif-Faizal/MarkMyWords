@@ -13,7 +13,7 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<Either<Failure, List<Note>>> getNotes() async {
     try {
       final noteModels = await remoteDataSource.getNotes();
-      return Right(noteModels);
+      return Right(noteModels.map((model) => model.toEntity()).toList());
     } catch (e) {
       if (e is Failure) {
         return Left(e);
@@ -26,7 +26,7 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<Either<Failure, List<Note>>> getCollaborativeNotes() async {
     try {
       final noteModels = await remoteDataSource.getCollaborativeNotes();
-      return Right(noteModels);
+      return Right(noteModels.map((model) => model.toEntity()).toList());
     } catch (e) {
       if (e is Failure) {
         return Left(e);
@@ -47,7 +47,7 @@ class NotesRepositoryImpl implements NotesRepository {
         content: content,
         isPrivate: isPrivate,
       );
-      return Right(noteModel);
+      return Right(noteModel.toEntity());
     } catch (e) {
       if (e is Failure) {
         return Left(e);
@@ -60,7 +60,7 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<Either<Failure, Note>> getNote(int id) async {
     try {
       final noteModel = await remoteDataSource.getNote(id);
-      return Right(noteModel);
+      return Right(noteModel.toEntity());
     } catch (e) {
       if (e is Failure) {
         return Left(e);
@@ -83,7 +83,7 @@ class NotesRepositoryImpl implements NotesRepository {
         content: content,
         isPrivate: isPrivate,
       );
-      return Right(noteModel);
+      return Right(noteModel.toEntity());
     } catch (e) {
       if (e is Failure) {
         return Left(e);

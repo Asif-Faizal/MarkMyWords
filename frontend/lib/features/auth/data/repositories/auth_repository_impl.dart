@@ -19,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       );
-      return Right(userModel);
+      return Right(userModel.toEntity());
     } catch (e) {
       if (e is Failure) {
         return Left(e);
@@ -44,7 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
         firstName: firstName,
         lastName: lastName,
       );
-      return Right(userModel);
+      return Right(userModel.toEntity());
     } catch (e) {
       if (e is Failure) {
         return Left(e);
@@ -57,7 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
       final userModel = await remoteDataSource.getCurrentUser();
-      return Right(userModel);
+      return Right(userModel.toEntity());
     } catch (e) {
       if (e is Failure) {
         return Left(e);

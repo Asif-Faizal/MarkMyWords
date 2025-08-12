@@ -18,13 +18,6 @@ import '../../features/notes/domain/usecases/update_note_usecase.dart';
 import '../../features/notes/domain/usecases/delete_note_usecase.dart';
 import '../../features/notes/domain/usecases/get_note_usecase.dart';
 import '../../features/notes/presentation/bloc/notes_bloc.dart';
-import '../../features/invites/data/datasources/invites_remote_data_source.dart';
-import '../../features/invites/data/repositories/invites_repository_impl.dart';
-import '../../features/invites/domain/repositories/invites_repository.dart';
-import '../../features/invites/domain/usecases/get_invites_usecase.dart';
-import '../../features/invites/domain/usecases/accept_invite_usecase.dart';
-import '../../features/invites/domain/usecases/decline_invite_usecase.dart';
-import '../../features/invites/presentation/bloc/invites_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -70,21 +63,5 @@ Future<void> init() async {
     deleteNoteUseCase: sl(),
     getNoteUseCase: sl(),
     webSocketService: sl(),
-  ));
-
-  // Invites Feature
-  sl.registerLazySingleton<InvitesRemoteDataSource>(
-    () => InvitesRemoteDataSourceImpl(networkService: sl()),
-  );
-  sl.registerLazySingleton<InvitesRepository>(
-    () => InvitesRepositoryImpl(remoteDataSource: sl()),
-  );
-  sl.registerLazySingleton(() => GetInvitesUseCase(repository: sl()));
-  sl.registerLazySingleton(() => AcceptInviteUseCase(repository: sl()));
-  sl.registerLazySingleton(() => DeclineInviteUseCase(repository: sl()));
-  sl.registerFactory(() => InvitesBloc(
-    getInvitesUseCase: sl(),
-    acceptInviteUseCase: sl(),
-    declineInviteUseCase: sl(),
   ));
 }
