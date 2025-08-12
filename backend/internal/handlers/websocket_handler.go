@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"markmywords-backend/internal/models"
-	"markmywords-backend/internal/websocket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -20,12 +19,12 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebSocketHandler struct {
-	manager *websocket.Manager
+	manager *wsmanager.Manager
 }
 
 func NewWebSocketHandler() *WebSocketHandler {
 	return &WebSocketHandler{
-		manager: websocket.NewManager(),
+		manager: wsmanager.NewManager(),
 	}
 }
 
@@ -134,6 +133,6 @@ func generateID() string {
 	return time.Now().Format("20060102150405") + "-" + time.Now().Format("000000000")
 }
 
-func (h *WebSocketHandler) GetManager() *websocket.Manager {
+func (h *WebSocketHandler) GetManager() *wsmanager.Manager {
 	return h.manager
 }
