@@ -27,8 +27,9 @@ func InitDB() {
 	// Auto migrate the schema
 	err = DB.AutoMigrate(
 		&models.User{},
+		&models.Thread{},
+		&models.ThreadCollaborator{},
 		&models.Note{},
-		&models.NoteCollaborator{},
 		&models.Invite{},
 	)
 
