@@ -41,7 +41,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await networkService.saveToken(data['token']);
     }
 
-    return UserModel.fromJson(data['user']);
+    final userData = data['user'];
+    if (userData == null) {
+      throw Exception('User data is null');
+    }
+    return UserModel.fromJson(userData);
   }
 
   @override
@@ -60,13 +64,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'last_name': lastName,
     });
 
-    return UserModel.fromJson(response.data['user']);
+    final userData = response.data['user'];
+    if (userData == null) {
+      throw Exception('User data is null');
+    }
+    return UserModel.fromJson(userData);
   }
 
   @override
   Future<UserModel> getCurrentUser() async {
     final response = await networkService.get('/auth/me');
-    return UserModel.fromJson(response.data['user']);
+    final userData = response.data['user'];
+    if (userData == null) {
+      throw Exception('User data is null');
+    }
+    return UserModel.fromJson(userData);
   }
 
   @override

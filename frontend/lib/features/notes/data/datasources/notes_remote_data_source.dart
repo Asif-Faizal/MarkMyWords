@@ -27,7 +27,9 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   @override
   Future<List<NoteModel>> getNotes() async {
     final response = await networkService.get('/notes');
-    return (response.data['notes'] as List)
+    final notesData = response.data['notes'];
+    if (notesData == null) return [];
+    return (notesData as List)
         .map((json) => NoteModel.fromJson(json))
         .toList();
   }
@@ -35,7 +37,9 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   @override
   Future<List<NoteModel>> getCollaborativeNotes() async {
     final response = await networkService.get('/notes/collaborative');
-    return (response.data['notes'] as List)
+    final notesData = response.data['notes'];
+    if (notesData == null) return [];
+    return (notesData as List)
         .map((json) => NoteModel.fromJson(json))
         .toList();
   }
@@ -51,13 +55,21 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
       'content': content,
       'is_private': isPrivate,
     });
-    return NoteModel.fromJson(response.data['note']);
+    final noteData = response.data['note'];
+    if (noteData == null) {
+      throw Exception('Note data is null');
+    }
+    return NoteModel.fromJson(noteData);
   }
 
   @override
   Future<NoteModel> getNote(int id) async {
     final response = await networkService.get('/notes/$id');
-    return NoteModel.fromJson(response.data['note']);
+    final noteData = response.data['note'];
+    if (noteData == null) {
+      throw Exception('Note data is null');
+    }
+    return NoteModel.fromJson(noteData);
   }
 
   @override
@@ -73,7 +85,11 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
     if (isPrivate != null) data['is_private'] = isPrivate;
 
     final response = await networkService.put('/notes/$id', data: data);
-    return NoteModel.fromJson(response.data['note']);
+    final noteData = response.data['note'];
+    if (noteData == null) {
+      throw Exception('Note data is null');
+    }
+    return NoteModel.fromJson(noteData);
   }
 
   @override
