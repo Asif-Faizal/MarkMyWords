@@ -60,16 +60,16 @@ func main() {
 			{
 				threads.GET("", threadHandler.GetThreads)
 				threads.POST("", threadHandler.CreateThread)
+				threads.GET("/collaborative", threadHandler.GetCollaborativeThreads)
 				threads.GET("/:id", threadHandler.GetThread)
 				threads.PUT("/:id", threadHandler.UpdateThread)
 				threads.DELETE("/:id", threadHandler.DeleteThread)
-				threads.GET("/collaborative", threadHandler.GetCollaborativeThreads)
 			}
 
 			// Note routes (messages within threads)
-			notes := protected.Group("/threads/:threadId/notes")
+			notes := protected.Group("/notes")
 			{
-				notes.GET("", noteHandler.GetThreadNotes)
+				notes.GET("/thread/:threadId", noteHandler.GetThreadNotes)
 				notes.POST("", noteHandler.CreateNote)
 				notes.GET("/:id", noteHandler.GetNote)
 				notes.PUT("/:id", noteHandler.UpdateNote)
@@ -85,7 +85,7 @@ func main() {
 			}
 
 			// Thread collaboration routes
-			threads.POST("/:threadId/invite", inviteHandler.CreateInvite)
+			threads.POST("/:id/invite", inviteHandler.CreateInvite)
 
 			// User search
 			protected.POST("/users/search", inviteHandler.SearchUsers)

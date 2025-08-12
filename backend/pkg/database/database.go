@@ -24,6 +24,14 @@ func InitDB() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
+	// Drop existing tables to handle schema changes
+	log.Println("Dropping existing tables for schema migration...")
+	DB.Migrator().DropTable(&models.Invite{})
+	DB.Migrator().DropTable(&models.Note{})
+	DB.Migrator().DropTable(&models.ThreadCollaborator{})
+	DB.Migrator().DropTable(&models.Thread{})
+	DB.Migrator().DropTable(&models.User{})
+
 	// Auto migrate the schema
 	err = DB.AutoMigrate(
 		&models.User{},

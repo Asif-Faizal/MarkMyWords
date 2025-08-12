@@ -18,10 +18,11 @@ type User struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relationships
-	Notes           []Note             `json:"notes,omitempty" gorm:"foreignKey:UserID"`
-	Collaborations  []NoteCollaborator `json:"collaborations,omitempty" gorm:"foreignKey:UserID"`
-	SentInvites     []Invite           `json:"sent_invites,omitempty" gorm:"foreignKey:FromUserID"`
-	ReceivedInvites []Invite           `json:"received_invites,omitempty" gorm:"foreignKey:ToUserID"`
+	Threads         []Thread             `json:"threads,omitempty" gorm:"foreignKey:UserID"`
+	Notes           []Note               `json:"notes,omitempty" gorm:"foreignKey:UserID"`
+	Collaborations  []ThreadCollaborator `json:"collaborations,omitempty" gorm:"foreignKey:UserID"`
+	SentInvites     []Invite             `json:"sent_invites,omitempty" gorm:"foreignKey:FromUserID"`
+	ReceivedInvites []Invite             `json:"received_invites,omitempty" gorm:"foreignKey:ToUserID"`
 }
 
 type UserResponse struct {

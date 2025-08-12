@@ -24,7 +24,7 @@ func NewInviteHandler() *InviteHandler {
 }
 
 func (h *InviteHandler) CreateInvite(c *gin.Context) {
-	threadID, err := strconv.ParseUint(c.Param("threadId"), 10, 32)
+	threadID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thread ID"})
 		return
