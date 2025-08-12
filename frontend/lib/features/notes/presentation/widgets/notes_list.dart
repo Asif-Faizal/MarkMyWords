@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/notes_bloc.dart';
+import '../bloc/notes_state.dart';
 import 'note_card.dart';
 
 class NotesList extends StatelessWidget {

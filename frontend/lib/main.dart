@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/di/injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/threads/presentation/bloc/threads_bloc.dart';
 import 'features/notes/presentation/bloc/notes_bloc.dart';
 import 'features/invites/presentation/bloc/invites_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
-import 'features/notes/presentation/pages/home_page.dart';
+import 'features/threads/presentation/pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,9 @@ class MarkMyWordsApp extends StatelessWidget {
       providers: [
         BlocProvider<AuthBloc>(
           create: (context) => di.sl<AuthBloc>()..add(CheckAuthStatus()),
+        ),
+        BlocProvider<ThreadsBloc>(
+          create: (context) => di.sl<ThreadsBloc>(),
         ),
         BlocProvider<NotesBloc>(
           create: (context) => di.sl<NotesBloc>(),
