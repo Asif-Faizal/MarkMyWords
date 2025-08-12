@@ -27,4 +27,15 @@ class UserModel extends User {
       createdAt: user.createdAt,
     );
   }
+
+  User toEntity() {
+    return User(
+      id: id,
+      email: email,
+      username: username,
+      firstName: firstName,
+      lastName: lastName,
+      createdAt: createdAt,
+    );
+  }
 }

@@ -4,7 +4,7 @@ import '../bloc/notes_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../widgets/notes_list.dart';
 import '../widgets/collaborative_notes_list.dart';
-import '../widgets/create_note_dialog.dart';
+import '../widgets/note_editor_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
