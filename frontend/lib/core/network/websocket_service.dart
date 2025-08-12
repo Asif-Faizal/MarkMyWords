@@ -25,7 +25,7 @@ class WebSocketService {
         }
       },
       onError: (error) {
-        print('WebSocket error: $error');
+        // WebSocket error: $error
         if (_onDisconnectedCallback != null) {
           _onDisconnectedCallback!();
         }

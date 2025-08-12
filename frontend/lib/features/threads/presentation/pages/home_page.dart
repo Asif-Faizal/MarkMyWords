@@ -5,7 +5,6 @@ import '../../../../features/threads/presentation/bloc/threads_bloc.dart';
 import '../../../../features/threads/presentation/bloc/threads_event.dart';
 import '../../../../features/threads/presentation/bloc/threads_state.dart';
 import '../widgets/threads_list.dart';
-import '../widgets/thread_card.dart';
 import '../widgets/create_thread_dialog.dart';
 
 class HomePage extends StatefulWidget {

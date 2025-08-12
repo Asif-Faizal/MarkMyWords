@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../features/threads/presentation/bloc/threads_bloc.dart';
-import '../bloc/threads_event.dart';
+import '../../../../features/threads/presentation/bloc/threads_event.dart';
 
 class CreateThreadDialog extends StatefulWidget {
   const CreateThreadDialog({super.key});
