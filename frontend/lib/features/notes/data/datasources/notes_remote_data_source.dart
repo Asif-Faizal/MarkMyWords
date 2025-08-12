@@ -2,19 +2,15 @@ import '../../../../core/network/network_service.dart';
 import '../models/note_model.dart';
 
 abstract class NotesRemoteDataSource {
-  Future<List<NoteModel>> getNotes();
-  Future<List<NoteModel>> getCollaborativeNotes();
+  Future<List<NoteModel>> getThreadNotes(int threadId);
   Future<NoteModel> createNote({
-    required String title,
     required String content,
-    required bool isPrivate,
+    required int threadId,
   });
   Future<NoteModel> getNote(int id);
   Future<NoteModel> updateNote({
     required int id,
-    String? title,
-    String? content,
-    bool? isPrivate,
+    required String content,
   });
   Future<void> deleteNote(int id);
 }
@@ -25,18 +21,8 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   NotesRemoteDataSourceImpl({required this.networkService});
 
   @override
-  Future<List<NoteModel>> getNotes() async {
-    final response = await networkService.get('/notes');
-    final notesData = response.data['notes'];
-    if (notesData == null) return [];
-    return (notesData as List)
-        .map((json) => NoteModel.fromJson(json))
-        .toList();
-  }
-
-  @override
-  Future<List<NoteModel>> getCollaborativeNotes() async {
-    final response = await networkService.get('/notes/collaborative');
+  Future<List<NoteModel>> getThreadNotes(int threadId) async {
+    final response = await networkService.get('/notes/thread/$threadId');
     final notesData = response.data['notes'];
     if (notesData == null) return [];
     return (notesData as List)
@@ -46,14 +32,12 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
 
   @override
   Future<NoteModel> createNote({
-    required String title,
     required String content,
-    required bool isPrivate,
+    required int threadId,
   }) async {
     final response = await networkService.post('/notes', data: {
-      'title': title,
       'content': content,
-      'is_private': isPrivate,
+      'thread_id': threadId,
     });
     final noteData = response.data['note'];
     if (noteData == null) {
@@ -75,16 +59,11 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   @override
   Future<NoteModel> updateNote({
     required int id,
-    String? title,
-    String? content,
-    bool? isPrivate,
+    required String content,
   }) async {
-    final data = <String, dynamic>{};
-    if (title != null) data['title'] = title;
-    if (content != null) data['content'] = content;
-    if (isPrivate != null) data['is_private'] = isPrivate;
-
-    final response = await networkService.put('/notes/$id', data: data);
+    final response = await networkService.put('/notes/$id', data: {
+      'content': content,
+    });
     final noteData = response.data['note'];
     if (noteData == null) {
       throw Exception('Note data is null');
