@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"markmywords-backend/internal/models"
+	wsmanager "markmywords-backend/internal/websocket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -23,8 +24,10 @@ type WebSocketHandler struct {
 }
 
 func NewWebSocketHandler() *WebSocketHandler {
+	manager := wsmanager.NewManager()
+	go manager.Start() // Start the manager goroutine
 	return &WebSocketHandler{
-		manager: wsmanager.NewManager(),
+		manager: manager,
 	}
 }
 

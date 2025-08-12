@@ -237,3 +237,18 @@ func (m *Manager) broadcastToNoteExcept(noteID uint, exceptUserID uint, message 
 func (m *Manager) GetManager() *Manager {
 	return m
 }
+
+// RegisterClient registers a new WebSocket client
+func (m *Manager) RegisterClient(client *models.WebSocketConnection) {
+	m.register <- client
+}
+
+// UnregisterClient unregisters a WebSocket client
+func (m *Manager) UnregisterClient(client *models.WebSocketConnection) {
+	m.unregister <- client
+}
+
+// BroadcastMessage broadcasts a message to all clients
+func (m *Manager) BroadcastMessage(message models.WebSocketMessage) {
+	m.broadcast <- message
+}
