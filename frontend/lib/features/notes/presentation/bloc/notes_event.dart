@@ -1,4 +1,4 @@
-part of 'notes_bloc.dart';
+import 'package:equatable/equatable.dart';
 
 abstract class NotesEvent extends Equatable {
   const NotesEvent();
@@ -7,87 +7,46 @@ abstract class NotesEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadNotes extends NotesEvent {}
+class LoadThreadNotes extends NotesEvent {
+  final int threadId;
+
+  const LoadThreadNotes(this.threadId);
+
+  @override
+  List<Object?> get props => [threadId];
+}
 
 class CreateNote extends NotesEvent {
-  final String title;
   final String content;
-  final bool isPrivate;
+  final int threadId;
 
   const CreateNote({
-    required this.title,
     required this.content,
-    required this.isPrivate,
+    required this.threadId,
   });
 
   @override
-  List<Object?> get props => [title, content, isPrivate];
+  List<Object?> get props => [content, threadId];
 }
 
 class UpdateNote extends NotesEvent {
   final int id;
-  final String? title;
-  final String? content;
-  final bool? isPrivate;
+  final String content;
 
   const UpdateNote({
     required this.id,
-    this.title,
-    this.content,
-    this.isPrivate,
+    required this.content,
   });
 
   @override
-  List<Object?> get props => [id, title, content, isPrivate];
+  List<Object?> get props => [id, content];
 }
 
 class DeleteNote extends NotesEvent {
   final int id;
 
-  const DeleteNote({required this.id});
+  const DeleteNote(this.id);
 
   @override
   List<Object?> get props => [id];
-}
-
-class LoadNote extends NotesEvent {
-  final int id;
-
-  const LoadNote({required this.id});
-
-  @override
-  List<Object?> get props => [id];
-}
-
-class JoinNoteSession extends NotesEvent {
-  final int noteId;
-
-  const JoinNoteSession({required this.noteId});
-
-  @override
-  List<Object?> get props => [noteId];
-}
-
-class LeaveNoteSession extends NotesEvent {
-  final int noteId;
-
-  const LeaveNoteSession({required this.noteId});
-
-  @override
-  List<Object?> get props => [noteId];
-}
-
-class NoteUpdated extends NotesEvent {
-  final int noteId;
-  final String content;
-  final String? title;
-
-  const NoteUpdated({
-    required this.noteId,
-    required this.content,
-    this.title,
-  });
-
-  @override
-  List<Object?> get props => [noteId, content, title];
 }
