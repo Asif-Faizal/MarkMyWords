@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/notes_bloc.dart';
-import 'note_card.dart';
+import '../bloc/notes_state.dart';
 
 class CollaborativeNotesList extends StatelessWidget {
   const CollaborativeNotesList({super.key});

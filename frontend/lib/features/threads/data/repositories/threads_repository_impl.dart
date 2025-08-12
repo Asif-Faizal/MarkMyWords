@@ -4,7 +4,6 @@ import '../../../../core/network/network_service.dart';
 import '../../domain/entities/thread.dart';
 import '../../domain/repositories/threads_repository.dart';
 import '../datasources/threads_remote_data_source.dart';
-import '../models/thread_model.dart';
 
 class ThreadsRepositoryImpl implements ThreadsRepository {
   final ThreadsRemoteDataSource remoteDataSource;

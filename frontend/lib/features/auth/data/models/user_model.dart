@@ -9,9 +9,9 @@ class UserModel extends User {
     required super.id,
     required super.email,
     required super.username,
-    @JsonKey(name: 'first_name') required super.firstName,
-    @JsonKey(name: 'last_name') required super.lastName,
-    @JsonKey(name: 'created_at') required super.createdAt,
+    required super.firstName,
+    required super.lastName,
+    required super.createdAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);

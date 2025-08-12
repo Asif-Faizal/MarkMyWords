@@ -4,7 +4,6 @@ import '../../../../core/network/network_service.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
 import '../datasources/notes_remote_data_source.dart';
-import '../models/note_model.dart';
 
 class NotesRepositoryImpl implements NotesRepository {
   final NotesRemoteDataSource remoteDataSource;

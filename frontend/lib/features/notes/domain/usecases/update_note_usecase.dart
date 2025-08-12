@@ -12,26 +12,20 @@ class UpdateNoteUseCase {
   Future<Either<Failure, Note>> call(UpdateNoteParams params) async {
     return await repository.updateNote(
       id: params.id,
-      title: params.title,
       content: params.content,
-      isPrivate: params.isPrivate,
     );
   }
 }
 
 class UpdateNoteParams extends Equatable {
   final int id;
-  final String? title;
-  final String? content;
-  final bool? isPrivate;
+  final String content;
 
   const UpdateNoteParams({
     required this.id,
-    this.title,
-    this.content,
-    this.isPrivate,
+    required this.content,
   });
 
   @override
-  List<Object?> get props => [id, title, content, isPrivate];
+  List<Object?> get props => [id, content];
 }

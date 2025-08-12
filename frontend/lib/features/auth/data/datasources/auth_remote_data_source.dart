@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../../../core/network/network_service.dart';
 import '../models/user_model.dart';
 
