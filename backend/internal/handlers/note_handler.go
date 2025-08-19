@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"markmywords-backend/internal/middleware"
-	"markmywords-backend/internal/models"
 	"markmywords-backend/internal/services"
+	"markmywords-backend/internal/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +22,7 @@ func NewNoteHandler() *NoteHandler {
 }
 
 func (h *NoteHandler) CreateNote(c *gin.Context) {
-	var req models.CreateNoteRequest
+	var req types.CreateNoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -82,7 +82,7 @@ func (h *NoteHandler) UpdateNote(c *gin.Context) {
 		return
 	}
 
-	var req models.UpdateNoteRequest
+	var req types.UpdateNoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

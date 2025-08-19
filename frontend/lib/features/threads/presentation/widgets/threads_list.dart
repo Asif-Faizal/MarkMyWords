@@ -10,10 +10,13 @@ class ThreadsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (threads.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No threads found',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+          style: TextStyle(
+            fontSize: 16,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }

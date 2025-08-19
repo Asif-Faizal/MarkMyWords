@@ -152,17 +152,12 @@ class _LoginFormState extends State<LoginForm> {
                   onPressed: state is AuthLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
                   ),
                   child: state is AuthLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
+                          child: _ProgressSpinner(),
                         )
                       : Text(_isLogin ? 'Login' : 'Register'),
                 ),
@@ -192,6 +187,20 @@ class _LoginFormState extends State<LoginForm> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProgressSpinner extends StatelessWidget {
+  const _ProgressSpinner();
+
+  @override
+  Widget build(BuildContext context) {
+    return CircularProgressIndicator(
+      strokeWidth: 2,
+      valueColor: AlwaysStoppedAnimation<Color>(
+        Theme.of(context).colorScheme.onPrimary,
       ),
     );
   }

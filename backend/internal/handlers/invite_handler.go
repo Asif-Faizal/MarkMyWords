@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"markmywords-backend/internal/middleware"
-	"markmywords-backend/internal/models"
 	"markmywords-backend/internal/services"
+	"markmywords-backend/internal/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +30,7 @@ func (h *InviteHandler) CreateInvite(c *gin.Context) {
 		return
 	}
 
-	var req models.CreateInviteRequest
+	var req types.CreateInviteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -96,7 +96,7 @@ func (h *InviteHandler) DeclineInvite(c *gin.Context) {
 }
 
 func (h *InviteHandler) SearchUsers(c *gin.Context) {
-	var req models.SearchUserRequest
+	var req types.SearchUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

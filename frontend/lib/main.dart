@@ -6,6 +6,7 @@ import 'features/threads/presentation/bloc/threads_bloc.dart';
 import 'features/notes/presentation/bloc/notes_bloc.dart';
 import 'features/invites/presentation/bloc/invites_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'core/theme/app_theme.dart';
 import 'features/threads/presentation/pages/home_page.dart';
 
 void main() async {
@@ -36,29 +37,7 @@ class MarkMyWordsApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'MarkMyWords',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            elevation: 0,
-          ),
-          cardTheme: const CardThemeData(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
+        theme: AppTheme.light,
         home: const AuthWrapper(),
         debugShowCheckedModeBanner: false,
       ),

@@ -5,26 +5,27 @@ import (
 	"log"
 	"sync"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
+
 	"github.com/gorilla/websocket"
 )
 
 type Manager struct {
-	threadSessions map[uint]*models.ThreadSession
-	clients        map[uint]*models.WebSocketConnection
-	register       chan *models.WebSocketConnection
-	unregister     chan *models.WebSocketConnection
-	broadcast      chan *models.WebSocketMessage
+	threadSessions map[uint]*types.ThreadSession
+	clients        map[uint]*types.WebSocketConnection
+	register       chan *types.WebSocketConnection
+	unregister     chan *types.WebSocketConnection
+	broadcast      chan *types.WebSocketMessage
 	mutex          sync.RWMutex
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		threadSessions: make(map[uint]*models.ThreadSession),
-		clients:        make(map[uint]*models.WebSocketConnection),
-		register:       make(chan *models.WebSocketConnection),
-		unregister:     make(chan *models.WebSocketConnection),
-		broadcast:      make(chan *models.WebSocketMessage),
+		threadSessions: make(map[uint]*types.ThreadSession),
+		clients:        make(map[uint]*types.WebSocketConnection),
+		register:       make(chan *types.WebSocketConnection),
+		unregister:     make(chan *types.WebSocketConnection),
+		broadcast:      make(chan *types.WebSocketMessage),
 	}
 }
 
@@ -39,9 +40,7 @@ func (m *Manager) Start() {
 
 		case client := <-m.unregister:
 			m.mutex.Lock()
-			if _, ok := m.clients[client.UserID]; ok {
-				delete(m.clients, client.UserID)
-			}
+			delete(m.clients, client.UserID)
 			// Remove from all thread sessions
 			for threadID, session := range m.threadSessions {
 				if _, ok := session.Users[client.UserID]; ok {
@@ -60,10 +59,10 @@ func (m *Manager) Start() {
 	}
 }
 
-func (m *Manager) handleMessage(message *models.WebSocketMessage) {
+func (m *Manager) handleMessage(message *types.WebSocketMessage) {
 	switch message.Type {
 	case "thread_join":
-		var joinMsg models.ThreadJoinMessage
+		var joinMsg types.ThreadJoinMessage
 		if data, err := json.Marshal(message.Payload); err == nil {
 			if err := json.Unmarshal(data, &joinMsg); err == nil {
 				m.handleThreadJoin(joinMsg)
@@ -71,7 +70,7 @@ func (m *Manager) handleMessage(message *models.WebSocketMessage) {
 		}
 
 	case "thread_leave":
-		var leaveMsg models.ThreadLeaveMessage
+		var leaveMsg types.ThreadLeaveMessage
 		if data, err := json.Marshal(message.Payload); err == nil {
 			if err := json.Unmarshal(data, &leaveMsg); err == nil {
 				m.handleThreadLeave(leaveMsg)
@@ -79,7 +78,7 @@ func (m *Manager) handleMessage(message *models.WebSocketMessage) {
 		}
 
 	case "note_add":
-		var noteMsg models.NoteAddMessage
+		var noteMsg types.NoteAddMessage
 		if data, err := json.Marshal(message.Payload); err == nil {
 			if err := json.Unmarshal(data, &noteMsg); err == nil {
 				m.handleNoteAdd(noteMsg)
@@ -87,7 +86,7 @@ func (m *Manager) handleMessage(message *models.WebSocketMessage) {
 		}
 
 	case "note_update":
-		var noteMsg models.NoteUpdateMessage
+		var noteMsg types.NoteUpdateMessage
 		if data, err := json.Marshal(message.Payload); err == nil {
 			if err := json.Unmarshal(data, &noteMsg); err == nil {
 				m.handleNoteUpdate(noteMsg)
@@ -95,7 +94,7 @@ func (m *Manager) handleMessage(message *models.WebSocketMessage) {
 		}
 
 	case "note_delete":
-		var noteMsg models.NoteDeleteMessage
+		var noteMsg types.NoteDeleteMessage
 		if data, err := json.Marshal(message.Payload); err == nil {
 			if err := json.Unmarshal(data, &noteMsg); err == nil {
 				m.handleNoteDelete(noteMsg)
@@ -103,7 +102,7 @@ func (m *Manager) handleMessage(message *models.WebSocketMessage) {
 		}
 
 	case "user_typing":
-		var typingMsg models.UserTypingMessage
+		var typingMsg types.UserTypingMessage
 		if data, err := json.Marshal(message.Payload); err == nil {
 			if err := json.Unmarshal(data, &typingMsg); err == nil {
 				m.handleUserTyping(typingMsg)
@@ -112,7 +111,7 @@ func (m *Manager) handleMessage(message *models.WebSocketMessage) {
 	}
 }
 
-func (m *Manager) handleThreadJoin(msg models.ThreadJoinMessage) {
+func (m *Manager) handleThreadJoin(msg types.ThreadJoinMessage) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -121,9 +120,9 @@ func (m *Manager) handleThreadJoin(msg models.ThreadJoinMessage) {
 			session.Users[msg.UserID] = client
 		}
 	} else {
-		session := &models.ThreadSession{
+		session := &types.ThreadSession{
 			ThreadID: msg.ThreadID,
-			Users:    make(map[uint]*models.WebSocketConnection),
+			Users:    make(map[uint]*types.WebSocketConnection),
 		}
 		if client, ok := m.clients[msg.UserID]; ok {
 			session.Users[msg.UserID] = client
@@ -132,7 +131,7 @@ func (m *Manager) handleThreadJoin(msg models.ThreadJoinMessage) {
 	}
 
 	// Notify other users in the thread
-	m.broadcastToThread(msg.ThreadID, &models.WebSocketMessage{
+	m.broadcastToThread(msg.ThreadID, &types.WebSocketMessage{
 		Type: "user_joined",
 		Payload: map[string]interface{}{
 			"thread_id": msg.ThreadID,
@@ -141,7 +140,7 @@ func (m *Manager) handleThreadJoin(msg models.ThreadJoinMessage) {
 	}, msg.UserID)
 }
 
-func (m *Manager) handleThreadLeave(msg models.ThreadLeaveMessage) {
+func (m *Manager) handleThreadLeave(msg types.ThreadLeaveMessage) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -153,7 +152,7 @@ func (m *Manager) handleThreadLeave(msg models.ThreadLeaveMessage) {
 	}
 
 	// Notify other users in the thread
-	m.broadcastToThread(msg.ThreadID, &models.WebSocketMessage{
+	m.broadcastToThread(msg.ThreadID, &types.WebSocketMessage{
 		Type: "user_left",
 		Payload: map[string]interface{}{
 			"thread_id": msg.ThreadID,
@@ -162,22 +161,22 @@ func (m *Manager) handleThreadLeave(msg models.ThreadLeaveMessage) {
 	}, msg.UserID)
 }
 
-func (m *Manager) handleNoteAdd(msg models.NoteAddMessage) {
-	m.broadcastToThread(msg.ThreadID, &models.WebSocketMessage{
+func (m *Manager) handleNoteAdd(msg types.NoteAddMessage) {
+	m.broadcastToThread(msg.ThreadID, &types.WebSocketMessage{
 		Type:    "note_added",
 		Payload: msg.Note,
 	}, 0)
 }
 
-func (m *Manager) handleNoteUpdate(msg models.NoteUpdateMessage) {
-	m.broadcastToThread(msg.ThreadID, &models.WebSocketMessage{
+func (m *Manager) handleNoteUpdate(msg types.NoteUpdateMessage) {
+	m.broadcastToThread(msg.ThreadID, &types.WebSocketMessage{
 		Type:    "note_updated",
 		Payload: msg.Note,
 	}, 0)
 }
 
-func (m *Manager) handleNoteDelete(msg models.NoteDeleteMessage) {
-	m.broadcastToThread(msg.ThreadID, &models.WebSocketMessage{
+func (m *Manager) handleNoteDelete(msg types.NoteDeleteMessage) {
+	m.broadcastToThread(msg.ThreadID, &types.WebSocketMessage{
 		Type: "note_deleted",
 		Payload: map[string]interface{}{
 			"thread_id": msg.ThreadID,
@@ -186,8 +185,8 @@ func (m *Manager) handleNoteDelete(msg models.NoteDeleteMessage) {
 	}, 0)
 }
 
-func (m *Manager) handleUserTyping(msg models.UserTypingMessage) {
-	m.broadcastToThread(msg.ThreadID, &models.WebSocketMessage{
+func (m *Manager) handleUserTyping(msg types.UserTypingMessage) {
+	m.broadcastToThread(msg.ThreadID, &types.WebSocketMessage{
 		Type: "user_typing",
 		Payload: map[string]interface{}{
 			"thread_id": msg.ThreadID,
@@ -197,7 +196,7 @@ func (m *Manager) handleUserTyping(msg models.UserTypingMessage) {
 	}, msg.UserID)
 }
 
-func (m *Manager) broadcastToThread(threadID uint, message *models.WebSocketMessage, excludeUserID uint) {
+func (m *Manager) broadcastToThread(threadID uint, message *types.WebSocketMessage, excludeUserID uint) {
 	if session, exists := m.threadSessions[threadID]; exists {
 		data, err := json.Marshal(message)
 		if err != nil {
@@ -220,15 +219,15 @@ func (m *Manager) broadcastToThread(threadID uint, message *models.WebSocketMess
 }
 
 // Public methods for external use
-func (m *Manager) RegisterClient(client *models.WebSocketConnection) {
+func (m *Manager) RegisterClient(client *types.WebSocketConnection) {
 	m.register <- client
 }
 
-func (m *Manager) UnregisterClient(client *models.WebSocketConnection) {
+func (m *Manager) UnregisterClient(client *types.WebSocketConnection) {
 	m.unregister <- client
 }
 
-func (m *Manager) BroadcastMessage(message *models.WebSocketMessage) {
+func (m *Manager) BroadcastMessage(message *types.WebSocketMessage) {
 	m.broadcast <- message
 }
 

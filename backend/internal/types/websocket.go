@@ -1,4 +1,4 @@
-package models
+package types
 
 type WebSocketMessage struct {
 	Type    string      `json:"type"`

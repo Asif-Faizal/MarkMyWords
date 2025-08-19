@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"markmywords-backend/internal/models"
 	"markmywords-backend/internal/services"
+	"markmywords-backend/internal/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +20,7 @@ func NewAuthHandler() *AuthHandler {
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req models.RegisterRequest
+	var req types.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -39,7 +39,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req models.LoginRequest
+	var req types.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

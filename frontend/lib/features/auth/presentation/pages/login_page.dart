@@ -8,13 +8,17 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue, Colors.purple],
+            colors: [
+              scheme.background,
+              scheme.surface,
+            ],
           ),
         ),
         child: SafeArea(
@@ -22,7 +26,7 @@ class LoginPage extends StatelessWidget {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Card(
-                elevation: 8,
+                elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -32,24 +36,24 @@ class LoginPage extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // App Logo/Title
-                      const Icon(
+                      Icon(
                         Icons.edit_note,
                         size: 64,
-                        color: Colors.blue,
+                        color: scheme.primary,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'MarkMyWords',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: scheme.primary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Collaborative Note Taking',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -65,8 +69,8 @@ class LoginPage extends StatelessWidget {
                               padding: const EdgeInsets.only(top: 16),
                               child: Text(
                                 state.message,
-                                style: const TextStyle(
-                                  color: Colors.red,
+                                style: TextStyle(
+                                  color: scheme.error,
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,

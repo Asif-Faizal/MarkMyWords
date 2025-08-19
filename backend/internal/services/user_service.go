@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
 	"markmywords-backend/pkg/auth"
 	"markmywords-backend/pkg/database"
 
@@ -20,9 +20,9 @@ func NewUserService() *UserService {
 	}
 }
 
-func (s *UserService) Register(req *models.RegisterRequest) (*models.UserResponse, error) {
+func (s *UserService) Register(req *types.RegisterRequest) (*types.UserResponse, error) {
 	// Check if user already exists
-	var existingUser models.User
+	var existingUser types.User
 	if err := s.db.Where("email = ? OR username = ?", req.Email, req.Username).First(&existingUser).Error; err == nil {
 		return nil, errors.New("user with this email or username already exists")
 	}
@@ -34,7 +34,7 @@ func (s *UserService) Register(req *models.RegisterRequest) (*models.UserRespons
 	}
 
 	// Create user
-	user := models.User{
+	user := types.User{
 		Email:     req.Email,
 		Username:  req.Username,
 		Password:  hashedPassword,
@@ -46,7 +46,7 @@ func (s *UserService) Register(req *models.RegisterRequest) (*models.UserRespons
 		return nil, err
 	}
 
-	return &models.UserResponse{
+	return &types.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
 		Username:  user.Username,
@@ -56,8 +56,8 @@ func (s *UserService) Register(req *models.RegisterRequest) (*models.UserRespons
 	}, nil
 }
 
-func (s *UserService) Login(req *models.LoginRequest) (*models.UserResponse, string, error) {
-	var user models.User
+func (s *UserService) Login(req *types.LoginRequest) (*types.UserResponse, string, error) {
+	var user types.User
 	if err := s.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
 		return nil, "", errors.New("invalid credentials")
 	}
@@ -72,7 +72,7 @@ func (s *UserService) Login(req *models.LoginRequest) (*models.UserResponse, str
 		return nil, "", err
 	}
 
-	return &models.UserResponse{
+	return &types.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
 		Username:  user.Username,
@@ -82,13 +82,13 @@ func (s *UserService) Login(req *models.LoginRequest) (*models.UserResponse, str
 	}, token, nil
 }
 
-func (s *UserService) GetUserByID(userID uint) (*models.UserResponse, error) {
-	var user models.User
+func (s *UserService) GetUserByID(userID uint) (*types.UserResponse, error) {
+	var user types.User
 	if err := s.db.First(&user, userID).Error; err != nil {
 		return nil, err
 	}
 
-	return &models.UserResponse{
+	return &types.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
 		Username:  user.Username,
@@ -98,8 +98,8 @@ func (s *UserService) GetUserByID(userID uint) (*models.UserResponse, error) {
 	}, nil
 }
 
-func (s *UserService) SearchUsers(query string, currentUserID uint) ([]models.UserResponse, error) {
-	var users []models.User
+func (s *UserService) SearchUsers(query string, currentUserID uint) ([]types.UserResponse, error) {
+	var users []types.User
 	err := s.db.Where("(username LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ?) AND id != ?",
 		"%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%", currentUserID).
 		Limit(10).
@@ -109,9 +109,9 @@ func (s *UserService) SearchUsers(query string, currentUserID uint) ([]models.Us
 		return nil, err
 	}
 
-	var responses []models.UserResponse
+	var responses []types.UserResponse
 	for _, user := range users {
-		responses = append(responses, models.UserResponse{
+		responses = append(responses, types.UserResponse{
 			ID:        user.ID,
 			Email:     user.Email,
 			Username:  user.Username,

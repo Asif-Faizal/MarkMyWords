@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
 	wsmanager "markmywords-backend/internal/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +51,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	}
 
 	// Create WebSocket client
-	client := &models.WebSocketConnection{
+	client := &types.WebSocketConnection{
 		UserID: uint(userID),
 		Conn:   conn,
 	}
@@ -69,7 +69,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 		}
 
 		// Parse message
-		var wsMessage models.WebSocketMessage
+		var wsMessage types.WebSocketMessage
 		if err := json.Unmarshal(message, &wsMessage); err != nil {
 			log.Printf("Error parsing message: %v", err)
 			continue

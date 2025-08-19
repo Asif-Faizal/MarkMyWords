@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"markmywords-backend/internal/middleware"
-	"markmywords-backend/internal/models"
 	"markmywords-backend/internal/services"
+	"markmywords-backend/internal/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +22,7 @@ func NewThreadHandler() *ThreadHandler {
 }
 
 func (h *ThreadHandler) CreateThread(c *gin.Context) {
-	var req models.CreateThreadRequest
+	var req types.CreateThreadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -76,7 +76,7 @@ func (h *ThreadHandler) UpdateThread(c *gin.Context) {
 		return
 	}
 
-	var req models.UpdateThreadRequest
+	var req types.UpdateThreadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

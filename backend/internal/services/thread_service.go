@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
 	"markmywords-backend/pkg/database"
 
 	"gorm.io/gorm"
@@ -19,8 +19,8 @@ func NewThreadService() *ThreadService {
 	}
 }
 
-func (s *ThreadService) CreateThread(req *models.CreateThreadRequest, userID uint) (*models.ThreadResponse, error) {
-	thread := models.Thread{
+func (s *ThreadService) CreateThread(req *types.CreateThreadRequest, userID uint) (*types.ThreadResponse, error) {
+	thread := types.Thread{
 		Title:       req.Title,
 		Description: req.Description,
 		IsPrivate:   req.IsPrivate,
@@ -34,8 +34,8 @@ func (s *ThreadService) CreateThread(req *models.CreateThreadRequest, userID uin
 	return s.GetThreadByID(thread.ID, userID)
 }
 
-func (s *ThreadService) GetUserThreads(userID uint) ([]models.ThreadResponse, error) {
-	var threads []models.Thread
+func (s *ThreadService) GetUserThreads(userID uint) ([]types.ThreadResponse, error) {
+	var threads []types.Thread
 	err := s.db.Where("user_id = ?", userID).
 		Preload("User").
 		Preload("Collaborators.User").
@@ -46,9 +46,9 @@ func (s *ThreadService) GetUserThreads(userID uint) ([]models.ThreadResponse, er
 		return nil, err
 	}
 
-	var responses []models.ThreadResponse
+	var responses []types.ThreadResponse
 	for _, thread := range threads {
-		response := models.ThreadResponse{
+		response := types.ThreadResponse{
 			ID:          thread.ID,
 			Title:       thread.Title,
 			Description: thread.Description,
@@ -60,7 +60,7 @@ func (s *ThreadService) GetUserThreads(userID uint) ([]models.ThreadResponse, er
 		}
 
 		if thread.User.ID != 0 {
-			response.User = models.UserResponse{
+			response.User = types.UserResponse{
 				ID:        thread.User.ID,
 				Email:     thread.User.Email,
 				Username:  thread.User.Username,
@@ -71,7 +71,7 @@ func (s *ThreadService) GetUserThreads(userID uint) ([]models.ThreadResponse, er
 		}
 
 		for _, collab := range thread.Collaborators {
-			response.Collaborators = append(response.Collaborators, models.UserResponse{
+			response.Collaborators = append(response.Collaborators, types.UserResponse{
 				ID:        collab.User.ID,
 				Email:     collab.User.Email,
 				Username:  collab.User.Username,
@@ -87,8 +87,8 @@ func (s *ThreadService) GetUserThreads(userID uint) ([]models.ThreadResponse, er
 	return responses, nil
 }
 
-func (s *ThreadService) GetThreadByID(threadID, userID uint) (*models.ThreadResponse, error) {
-	var thread models.Thread
+func (s *ThreadService) GetThreadByID(threadID, userID uint) (*types.ThreadResponse, error) {
+	var thread types.Thread
 	err := s.db.Where("id = ?", threadID).
 		Preload("User").
 		Preload("Collaborators.User").
@@ -102,13 +102,13 @@ func (s *ThreadService) GetThreadByID(threadID, userID uint) (*models.ThreadResp
 	// Check if user has access to this thread
 	if thread.UserID != userID {
 		// Check if user is a collaborator
-		var collaborator models.ThreadCollaborator
+		var collaborator types.ThreadCollaborator
 		if err := s.db.Where("thread_id = ? AND user_id = ?", threadID, userID).First(&collaborator).Error; err != nil {
 			return nil, errors.New("access denied")
 		}
 	}
 
-	response := models.ThreadResponse{
+	response := types.ThreadResponse{
 		ID:          thread.ID,
 		Title:       thread.Title,
 		Description: thread.Description,
@@ -120,7 +120,7 @@ func (s *ThreadService) GetThreadByID(threadID, userID uint) (*models.ThreadResp
 	}
 
 	if thread.User.ID != 0 {
-		response.User = models.UserResponse{
+		response.User = types.UserResponse{
 			ID:        thread.User.ID,
 			Email:     thread.User.Email,
 			Username:  thread.User.Username,
@@ -131,7 +131,7 @@ func (s *ThreadService) GetThreadByID(threadID, userID uint) (*models.ThreadResp
 	}
 
 	for _, collab := range thread.Collaborators {
-		response.Collaborators = append(response.Collaborators, models.UserResponse{
+		response.Collaborators = append(response.Collaborators, types.UserResponse{
 			ID:        collab.User.ID,
 			Email:     collab.User.Email,
 			Username:  collab.User.Username,
@@ -144,8 +144,8 @@ func (s *ThreadService) GetThreadByID(threadID, userID uint) (*models.ThreadResp
 	return &response, nil
 }
 
-func (s *ThreadService) UpdateThread(threadID, userID uint, req *models.UpdateThreadRequest) (*models.ThreadResponse, error) {
-	var thread models.Thread
+func (s *ThreadService) UpdateThread(threadID, userID uint, req *types.UpdateThreadRequest) (*types.ThreadResponse, error) {
+	var thread types.Thread
 	if err := s.db.First(&thread, threadID).Error; err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (s *ThreadService) UpdateThread(threadID, userID uint, req *models.UpdateTh
 }
 
 func (s *ThreadService) DeleteThread(threadID, userID uint) error {
-	var thread models.Thread
+	var thread types.Thread
 	if err := s.db.First(&thread, threadID).Error; err != nil {
 		return err
 	}
@@ -187,8 +187,8 @@ func (s *ThreadService) DeleteThread(threadID, userID uint) error {
 	return s.db.Delete(&thread).Error
 }
 
-func (s *ThreadService) GetCollaborativeThreads(userID uint) ([]models.ThreadResponse, error) {
-	var threads []models.Thread
+func (s *ThreadService) GetCollaborativeThreads(userID uint) ([]types.ThreadResponse, error) {
+	var threads []types.Thread
 	err := s.db.Joins("JOIN thread_collaborators ON threads.id = thread_collaborators.thread_id").
 		Where("thread_collaborators.user_id = ?", userID).
 		Preload("User").
@@ -200,9 +200,9 @@ func (s *ThreadService) GetCollaborativeThreads(userID uint) ([]models.ThreadRes
 		return nil, err
 	}
 
-	var responses []models.ThreadResponse
+	var responses []types.ThreadResponse
 	for _, thread := range threads {
-		response := models.ThreadResponse{
+		response := types.ThreadResponse{
 			ID:          thread.ID,
 			Title:       thread.Title,
 			Description: thread.Description,
@@ -214,7 +214,7 @@ func (s *ThreadService) GetCollaborativeThreads(userID uint) ([]models.ThreadRes
 		}
 
 		if thread.User.ID != 0 {
-			response.User = models.UserResponse{
+			response.User = types.UserResponse{
 				ID:        thread.User.ID,
 				Email:     thread.User.Email,
 				Username:  thread.User.Username,
@@ -225,7 +225,7 @@ func (s *ThreadService) GetCollaborativeThreads(userID uint) ([]models.ThreadRes
 		}
 
 		for _, collab := range thread.Collaborators {
-			response.Collaborators = append(response.Collaborators, models.UserResponse{
+			response.Collaborators = append(response.Collaborators, types.UserResponse{
 				ID:        collab.User.ID,
 				Email:     collab.User.Email,
 				Username:  collab.User.Username,

@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
 )
 
 var DB *gorm.DB
@@ -26,19 +26,19 @@ func InitDB() {
 
 	// Drop existing tables to handle schema changes
 	log.Println("Dropping existing tables for schema migration...")
-	DB.Migrator().DropTable(&models.Invite{})
-	DB.Migrator().DropTable(&models.Note{})
-	DB.Migrator().DropTable(&models.ThreadCollaborator{})
-	DB.Migrator().DropTable(&models.Thread{})
-	DB.Migrator().DropTable(&models.User{})
+	DB.Migrator().DropTable(&types.Invite{})
+	DB.Migrator().DropTable(&types.Note{})
+	DB.Migrator().DropTable(&types.ThreadCollaborator{})
+	DB.Migrator().DropTable(&types.Thread{})
+	DB.Migrator().DropTable(&types.User{})
 
 	// Auto migrate the schema
 	err = DB.AutoMigrate(
-		&models.User{},
-		&models.Thread{},
-		&models.ThreadCollaborator{},
-		&models.Note{},
-		&models.Invite{},
+		&types.User{},
+		&types.Thread{},
+		&types.ThreadCollaborator{},
+		&types.Note{},
+		&types.Invite{},
 	)
 
 	if err != nil {

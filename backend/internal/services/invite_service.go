@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
 	"markmywords-backend/pkg/database"
 
 	"gorm.io/gorm"
@@ -19,9 +19,9 @@ func NewInviteService() *InviteService {
 	}
 }
 
-func (s *InviteService) CreateInvite(req *models.CreateInviteRequest, fromUserID uint) (*models.InviteResponse, error) {
+func (s *InviteService) CreateInvite(req *types.CreateInviteRequest, fromUserID uint) (*types.InviteResponse, error) {
 	// Check if thread exists and user owns it
-	var thread models.Thread
+	var thread types.Thread
 	if err := s.db.First(&thread, req.ThreadID).Error; err != nil {
 		return nil, errors.New("thread not found")
 	}
@@ -31,29 +31,29 @@ func (s *InviteService) CreateInvite(req *models.CreateInviteRequest, fromUserID
 	}
 
 	// Check if target user exists
-	var toUser models.User
+	var toUser types.User
 	if err := s.db.First(&toUser, req.ToUserID).Error; err != nil {
 		return nil, errors.New("target user not found")
 	}
 
 	// Check if invite already exists
-	var existingInvite models.Invite
-	if err := s.db.Where("thread_id = ? AND to_user_id = ? AND status = ?", 
-		req.ThreadID, req.ToUserID, models.InviteStatusPending).First(&existingInvite).Error; err == nil {
+	var existingInvite types.Invite
+	if err := s.db.Where("thread_id = ? AND to_user_id = ? AND status = ?",
+		req.ThreadID, req.ToUserID, types.InviteStatusPending).First(&existingInvite).Error; err == nil {
 		return nil, errors.New("invite already exists")
 	}
 
 	// Check if user is already a collaborator
-	var existingCollaborator models.ThreadCollaborator
+	var existingCollaborator types.ThreadCollaborator
 	if err := s.db.Where("thread_id = ? AND user_id = ?", req.ThreadID, req.ToUserID).First(&existingCollaborator).Error; err == nil {
 		return nil, errors.New("user is already a collaborator")
 	}
 
-	invite := models.Invite{
+	invite := types.Invite{
 		ThreadID:   req.ThreadID,
 		FromUserID: fromUserID,
 		ToUserID:   req.ToUserID,
-		Status:     models.InviteStatusPending,
+		Status:     types.InviteStatusPending,
 	}
 
 	if err := s.db.Create(&invite).Error; err != nil {
@@ -63,8 +63,8 @@ func (s *InviteService) CreateInvite(req *models.CreateInviteRequest, fromUserID
 	return s.GetInviteByID(invite.ID)
 }
 
-func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, error) {
-	var invites []models.Invite
+func (s *InviteService) GetUserInvites(userID uint) ([]types.InviteResponse, error) {
+	var invites []types.Invite
 	err := s.db.Where("to_user_id = ?", userID).
 		Preload("Thread").
 		Preload("FromUser").
@@ -75,9 +75,9 @@ func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, er
 		return nil, err
 	}
 
-	var responses []models.InviteResponse
+	var responses []types.InviteResponse
 	for _, invite := range invites {
-		response := models.InviteResponse{
+		response := types.InviteResponse{
 			ID:         invite.ID,
 			ThreadID:   invite.ThreadID,
 			FromUserID: invite.FromUserID,
@@ -88,7 +88,7 @@ func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, er
 		}
 
 		if invite.Thread.ID != 0 {
-			response.Thread = models.ThreadResponse{
+			response.Thread = types.ThreadResponse{
 				ID:          invite.Thread.ID,
 				Title:       invite.Thread.Title,
 				Description: invite.Thread.Description,
@@ -100,7 +100,7 @@ func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, er
 		}
 
 		if invite.FromUser.ID != 0 {
-			response.FromUser = models.UserResponse{
+			response.FromUser = types.UserResponse{
 				ID:        invite.FromUser.ID,
 				Email:     invite.FromUser.Email,
 				Username:  invite.FromUser.Username,
@@ -111,7 +111,7 @@ func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, er
 		}
 
 		if invite.ToUser.ID != 0 {
-			response.ToUser = models.UserResponse{
+			response.ToUser = types.UserResponse{
 				ID:        invite.ToUser.ID,
 				Email:     invite.ToUser.Email,
 				Username:  invite.ToUser.Username,
@@ -128,7 +128,7 @@ func (s *InviteService) GetUserInvites(userID uint) ([]models.InviteResponse, er
 }
 
 func (s *InviteService) AcceptInvite(inviteID, userID uint) error {
-	var invite models.Invite
+	var invite types.Invite
 	if err := s.db.First(&invite, inviteID).Error; err != nil {
 		return errors.New("invite not found")
 	}
@@ -137,7 +137,7 @@ func (s *InviteService) AcceptInvite(inviteID, userID uint) error {
 		return errors.New("access denied")
 	}
 
-	if invite.Status != models.InviteStatusPending {
+	if invite.Status != types.InviteStatusPending {
 		return errors.New("invite is not pending")
 	}
 
@@ -145,13 +145,13 @@ func (s *InviteService) AcceptInvite(inviteID, userID uint) error {
 	tx := s.db.Begin()
 
 	// Update invite status
-	if err := tx.Model(&invite).Update("status", models.InviteStatusAccepted).Error; err != nil {
+	if err := tx.Model(&invite).Update("status", types.InviteStatusAccepted).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// Add user as collaborator
-	collaborator := models.ThreadCollaborator{
+	collaborator := types.ThreadCollaborator{
 		ThreadID: invite.ThreadID,
 		UserID:   userID,
 	}
@@ -165,7 +165,7 @@ func (s *InviteService) AcceptInvite(inviteID, userID uint) error {
 }
 
 func (s *InviteService) DeclineInvite(inviteID, userID uint) error {
-	var invite models.Invite
+	var invite types.Invite
 	if err := s.db.First(&invite, inviteID).Error; err != nil {
 		return errors.New("invite not found")
 	}
@@ -174,15 +174,15 @@ func (s *InviteService) DeclineInvite(inviteID, userID uint) error {
 		return errors.New("access denied")
 	}
 
-	if invite.Status != models.InviteStatusPending {
+	if invite.Status != types.InviteStatusPending {
 		return errors.New("invite is not pending")
 	}
 
-	return s.db.Model(&invite).Update("status", models.InviteStatusDeclined).Error
+	return s.db.Model(&invite).Update("status", types.InviteStatusDeclined).Error
 }
 
-func (s *InviteService) GetInviteByID(inviteID uint) (*models.InviteResponse, error) {
-	var invite models.Invite
+func (s *InviteService) GetInviteByID(inviteID uint) (*types.InviteResponse, error) {
+	var invite types.Invite
 	err := s.db.Where("id = ?", inviteID).
 		Preload("Thread").
 		Preload("FromUser").
@@ -193,7 +193,7 @@ func (s *InviteService) GetInviteByID(inviteID uint) (*models.InviteResponse, er
 		return nil, err
 	}
 
-	response := models.InviteResponse{
+	response := types.InviteResponse{
 		ID:         invite.ID,
 		ThreadID:   invite.ThreadID,
 		FromUserID: invite.FromUserID,
@@ -204,7 +204,7 @@ func (s *InviteService) GetInviteByID(inviteID uint) (*models.InviteResponse, er
 	}
 
 	if invite.Thread.ID != 0 {
-		response.Thread = models.ThreadResponse{
+		response.Thread = types.ThreadResponse{
 			ID:          invite.Thread.ID,
 			Title:       invite.Thread.Title,
 			Description: invite.Thread.Description,
@@ -216,7 +216,7 @@ func (s *InviteService) GetInviteByID(inviteID uint) (*models.InviteResponse, er
 	}
 
 	if invite.FromUser.ID != 0 {
-		response.FromUser = models.UserResponse{
+		response.FromUser = types.UserResponse{
 			ID:        invite.FromUser.ID,
 			Email:     invite.FromUser.Email,
 			Username:  invite.FromUser.Username,
@@ -227,7 +227,7 @@ func (s *InviteService) GetInviteByID(inviteID uint) (*models.InviteResponse, er
 	}
 
 	if invite.ToUser.ID != 0 {
-		response.ToUser = models.UserResponse{
+		response.ToUser = types.UserResponse{
 			ID:        invite.ToUser.ID,
 			Email:     invite.ToUser.Email,
 			Username:  invite.ToUser.Username,

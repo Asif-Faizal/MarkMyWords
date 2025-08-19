@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 
-	"markmywords-backend/internal/models"
+	"markmywords-backend/internal/types"
 	"markmywords-backend/pkg/database"
 
 	"gorm.io/gorm"
@@ -19,9 +19,9 @@ func NewNoteService() *NoteService {
 	}
 }
 
-func (s *NoteService) CreateNote(req *models.CreateNoteRequest, userID uint) (*models.NoteResponse, error) {
+func (s *NoteService) CreateNote(req *types.CreateNoteRequest, userID uint) (*types.NoteResponse, error) {
 	// Check if user has access to the thread
-	var thread models.Thread
+	var thread types.Thread
 	if err := s.db.First(&thread, req.ThreadID).Error; err != nil {
 		return nil, errors.New("thread not found")
 	}
@@ -29,13 +29,13 @@ func (s *NoteService) CreateNote(req *models.CreateNoteRequest, userID uint) (*m
 	// Check if user can add notes to this thread
 	if thread.UserID != userID {
 		// Check if user is a collaborator
-		var collaborator models.ThreadCollaborator
+		var collaborator types.ThreadCollaborator
 		if err := s.db.Where("thread_id = ? AND user_id = ?", req.ThreadID, userID).First(&collaborator).Error; err != nil {
 			return nil, errors.New("access denied")
 		}
 	}
 
-	note := models.Note{
+	note := types.Note{
 		Content:  req.Content,
 		ThreadID: req.ThreadID,
 		UserID:   userID,
@@ -48,9 +48,9 @@ func (s *NoteService) CreateNote(req *models.CreateNoteRequest, userID uint) (*m
 	return s.GetNoteByID(note.ID, userID)
 }
 
-func (s *NoteService) GetThreadNotes(threadID, userID uint) ([]models.NoteResponse, error) {
+func (s *NoteService) GetThreadNotes(threadID, userID uint) ([]types.NoteResponse, error) {
 	// Check if user has access to the thread
-	var thread models.Thread
+	var thread types.Thread
 	if err := s.db.First(&thread, threadID).Error; err != nil {
 		return nil, errors.New("thread not found")
 	}
@@ -58,13 +58,13 @@ func (s *NoteService) GetThreadNotes(threadID, userID uint) ([]models.NoteRespon
 	// Check if user can view notes in this thread
 	if thread.UserID != userID {
 		// Check if user is a collaborator
-		var collaborator models.ThreadCollaborator
+		var collaborator types.ThreadCollaborator
 		if err := s.db.Where("thread_id = ? AND user_id = ?", threadID, userID).First(&collaborator).Error; err != nil {
 			return nil, errors.New("access denied")
 		}
 	}
 
-	var notes []models.Note
+	var notes []types.Note
 	err := s.db.Where("thread_id = ?", threadID).
 		Preload("User").
 		Order("created_at ASC").
@@ -74,9 +74,9 @@ func (s *NoteService) GetThreadNotes(threadID, userID uint) ([]models.NoteRespon
 		return nil, err
 	}
 
-	var responses []models.NoteResponse
+	var responses []types.NoteResponse
 	for _, note := range notes {
-		response := models.NoteResponse{
+		response := types.NoteResponse{
 			ID:        note.ID,
 			Content:   note.Content,
 			ThreadID:  note.ThreadID,
@@ -86,7 +86,7 @@ func (s *NoteService) GetThreadNotes(threadID, userID uint) ([]models.NoteRespon
 		}
 
 		if note.User.ID != 0 {
-			response.User = models.UserResponse{
+			response.User = types.UserResponse{
 				ID:        note.User.ID,
 				Email:     note.User.Email,
 				Username:  note.User.Username,
@@ -102,8 +102,8 @@ func (s *NoteService) GetThreadNotes(threadID, userID uint) ([]models.NoteRespon
 	return responses, nil
 }
 
-func (s *NoteService) GetNoteByID(noteID, userID uint) (*models.NoteResponse, error) {
-	var note models.Note
+func (s *NoteService) GetNoteByID(noteID, userID uint) (*types.NoteResponse, error) {
+	var note types.Note
 	err := s.db.Where("id = ?", noteID).
 		Preload("User").
 		First(&note).Error
@@ -113,20 +113,20 @@ func (s *NoteService) GetNoteByID(noteID, userID uint) (*models.NoteResponse, er
 	}
 
 	// Check if user has access to this note (through thread access)
-	var thread models.Thread
+	var thread types.Thread
 	if err := s.db.First(&thread, note.ThreadID).Error; err != nil {
 		return nil, errors.New("thread not found")
 	}
 
 	if thread.UserID != userID {
 		// Check if user is a collaborator
-		var collaborator models.ThreadCollaborator
+		var collaborator types.ThreadCollaborator
 		if err := s.db.Where("thread_id = ? AND user_id = ?", note.ThreadID, userID).First(&collaborator).Error; err != nil {
 			return nil, errors.New("access denied")
 		}
 	}
 
-	response := models.NoteResponse{
+	response := types.NoteResponse{
 		ID:        note.ID,
 		Content:   note.Content,
 		ThreadID:  note.ThreadID,
@@ -136,7 +136,7 @@ func (s *NoteService) GetNoteByID(noteID, userID uint) (*models.NoteResponse, er
 	}
 
 	if note.User.ID != 0 {
-		response.User = models.UserResponse{
+		response.User = types.UserResponse{
 			ID:        note.User.ID,
 			Email:     note.User.Email,
 			Username:  note.User.Username,
@@ -149,8 +149,8 @@ func (s *NoteService) GetNoteByID(noteID, userID uint) (*models.NoteResponse, er
 	return &response, nil
 }
 
-func (s *NoteService) UpdateNote(noteID, userID uint, req *models.UpdateNoteRequest) (*models.NoteResponse, error) {
-	var note models.Note
+func (s *NoteService) UpdateNote(noteID, userID uint, req *types.UpdateNoteRequest) (*types.NoteResponse, error) {
+	var note types.Note
 	if err := s.db.First(&note, noteID).Error; err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func (s *NoteService) UpdateNote(noteID, userID uint, req *models.UpdateNoteRequ
 }
 
 func (s *NoteService) DeleteNote(noteID, userID uint) error {
-	var note models.Note
+	var note types.Note
 	if err := s.db.First(&note, noteID).Error; err != nil {
 		return err
 	}
