@@ -52,7 +52,7 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        if (state is AuthLoading) {
+        if (state is AuthChecking) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),

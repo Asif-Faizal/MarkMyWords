@@ -31,7 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(AuthChecking());
     
     final result = await getCurrentUserUseCase();
     
