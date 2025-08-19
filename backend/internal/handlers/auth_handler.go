@@ -5,6 +5,7 @@ import (
 
 	"markmywords-backend/internal/services"
 	"markmywords-backend/internal/types"
+	"markmywords-backend/pkg/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,9 +33,20 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Generate and return a token so the client can be authenticated immediately
+	token, tokenErr := auth.GenerateToken(user.ID, user.Email)
+	if tokenErr != nil {
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "User registered successfully",
+			"user":    user,
+		})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
 		"user":    user,
+		"token":   token,
 	})
 }
 

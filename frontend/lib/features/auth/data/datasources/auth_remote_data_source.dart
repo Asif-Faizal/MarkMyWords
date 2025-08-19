@@ -63,7 +63,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'last_name': lastName,
     });
 
-    final userData = response.data['user'];
+    final data = response.data;
+    if (data['token'] != null) {
+      await networkService.saveToken(data['token']);
+    }
+    final userData = data['user'];
     if (userData == null) {
       throw Exception('User data is null');
     }
